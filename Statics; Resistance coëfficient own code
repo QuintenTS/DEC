@@ -1,0 +1,56 @@
+#include <Servo.h>
+#include<Adafruit_GFX.h>
+#include<Adafruit_SSD1306.h>
+#define OLED_RESET 4
+
+Adafruit_SSD1306 display(OLED_RESET);
+Servo myservo;
+
+int pinServo=5;
+int InfraRed=A2;
+int afstand=1;
+float wrijvingscoefficient=0;
+float nulstand=103;
+float hoek=nulstand;
+
+void setup() 
+{
+  myservo.attach(pinServo);
+  display.begin(SSD1306_SWITCHCAPVCC,0x3C);
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  delay(10);
+}
+
+void loop() 
+{
+  afstand=digitalRead(InfraRed);
+  if (afstand==1)
+  {
+    hoek=(hoek + .1);
+    myservo.write(hoek);
+    delay(10);
+    if (hoek>(nulstand+45))
+    {
+    hoek=nulstand;
+    myservo.write(hoek);
+    delay(1000);
+    }
+    else
+    {
+    }
+  }
+  else
+  {
+    float degrees = hoek-nulstand;
+    wrijvingscoefficient = (tan((degrees) * (3.1415926 / 180)));
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.print("Wrijvingscoefficient is ");
+    display.println(wrijvingscoefficient);
+    display.display();
+    hoek=nulstand-45;
+    myservo.write(hoek);
+    delay(1000);
+  }
+}
